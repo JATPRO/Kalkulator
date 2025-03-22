@@ -2,8 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Scientific Full Screen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <title>✨Kalkulator✨</title>
+    <link rel="icon" type="image/svg+xml" href="https://img.icons8.com/?size=100&id=mLzZg2PFa2A4&format=png&color=000000">
     <style>
         * {
             margin: 0;
@@ -22,6 +25,33 @@
             gap: 20px;
         }
 
+        .history {
+        background: #2d2d2d;
+        padding: 20px;
+        border-radius: 15px;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    
+    .history h2 {
+        color: #b825ab;
+        margin-bottom: 15px;
+    }
+    
+    .history-item {
+        padding: 10px;
+        margin-bottom: 8px;
+        background: #3d3d3d;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    
+    .history-item span {
+        display: block;
+        color: #888;
+        font-size: 12px;
+    }
+        
         .calculator {
             background: #2d2d2d;
             padding: 20px;
@@ -144,70 +174,30 @@
             <button onclick="appendToDisplay('.')">.</button>
 
             <!-- Baris 4 -->
-            <button onclick="appendToDisplay('7')">7</button>
-            <button onclick="appendToDisplay('8')">8</button>
-            <button onclick="appendToDisplay('9')">9</button>
+            <button onclick="appendToDisplay('+')">+</button>
+            <button onclick="appendToDisplay('-')">-</button>
+            <button onclick="appendToDisplay('*')">×</button>
             <button onclick="appendToDisplay('/')">/</button>
-            <button onclick="appendToDisplay('4')">4</button>
-            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('0')">0</button>
+            <button onclick="appendToDisplay('1')">1</button>
 
             <!-- Baris 5 -->
-            <button onclick="appendToDisplay('6')">6</button>
-            <button onclick="appendToDisplay('*')">×</button>
-            <button onclick="appendToDisplay('1')">1</button>
             <button onclick="appendToDisplay('2')">2</button>
             <button onclick="appendToDisplay('3')">3</button>
-            <button onclick="appendToDisplay('-')">-</button>
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendToDisplay('7')">7</button>
 
             <!-- Baris 6 -->
-            <button onclick="appendToDisplay('0')">0</button>
-            <button onclick="appendToDisplay('+')">+</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
             <button onclick="calculate()" style="grid-column: span 2; background: #4CAF50;">=</button>
         </div>
     </div>
-
-    <div class="tutorial">
-        <h2>📚 Tutorial Penggunaan</h2>
-        
-        <div class="tutorial-section">
-            <h3>🔢 Operasi Dasar</h3>
-            <ul>
-                <li>Penjumlahan: 2 + 3 = 5</li>
-                <li>Pengurangan: 5 - 2 = 3</li>
-                <li>Perkalian: 3 × 4 = 12</li>
-                <li>Pembagian: 12 ÷ 4 = 3</li>
-            </ul>
-        </div>
-
-        <div class="tutorial-section">
-            <h3>⚛️ Fungsi Scientific</h3>
-            <ul>
-                <li>Sin/Cos/Tan: sin(π/2) = 1</li>
-                <li>Logaritma: log(100) = 2</li>
-                <li>Natural Log: ln(e) = 1</li>
-                <li>Akar Kuadrat: √(9) = 3</li>
-                <li>Pangkat: 2^3 = 8</li>
-                <li>Nilai Mutlak: abs(-5) = 5</li>
-            </ul>
-        </div>
-
-        <div class="tutorial-section">
-            <h3>📌 Konstanta</h3>
-            <ul>
-                <li>π ≈ 3.1415926536</li>
-                <li>e ≈ 2.7182818285</li>
-            </ul>
-        </div>
-
-        <div class="tutorial-section">
-            <h3>⚠️ Catatan Penting</h3>
-            <ul>
-                <li>Gunakan tanda kurung untuk operasi kompleks</li>
-                <li>Satuan sudut dalam radian</li>
-                <li>Tekan ⌫ untuk menghapus karakter terakhir</li>
-                <li>Tekan C untuk menghapus semua</li>
-            </ul>
-        </div>
+    <div class="history">
+        <h2>Riwayat Perhitungan</h2>
+        <div id="historyList"></div>
     </div>
     <script>
         const display = document.getElementById('display');
@@ -281,28 +271,73 @@
             }
         }
     </script>
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-      
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    <script>
+        /* === KODE BARU TANPA MENGUBAH YANG LAMA === */
+        // Inisialisasi Firebase
         const firebaseConfig = {
-          apiKey: "AIzaSyCNlLwCDeeY7nUfi0qFMmmPaRz5sq0QkAo",
-          authDomain: "kalkulator-1a300.firebaseapp.com",
-          projectId: "kalkulator-1a300",
-          storageBucket: "kalkulator-1a300.firebasestorage.app",
-          messagingSenderId: "580075045669",
-          appId: "1:580075045669:web:079ac580f71a4168bf10cc",
-          measurementId: "G-9LX4LY85T0"
+            apiKey: "AIzaSyCZLKnyc_xCXzSn6QeHgUYTWGWwf4XQejs",
+            authDomain: "riwayat-4dfb8.firebaseapp.com",
+            databaseURL: "https://riwayat-4dfb8-default-rtdb.firebaseio.com",
+            projectId: "riwayat-4dfb8",
+            storageBucket: "riwayat-4dfb8.firebasestorage.app",
+            messagingSenderId: "928263483984",
+            appId: "1:928263483984:web:9a59a1b75bc2f86d385755",
+            measurementId: "G-1F3YY10RXC"
         };
-      
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-      </script>
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Simpan fungsi calculate asli
+        const originalCalculate = calculate;
+        
+        // Override fungsi calculate
+        window.calculate = function() {
+            const originalValue = display.value;
+            
+            // Panggil fungsi calculate asli
+            originalCalculate.call(window);
+            
+            // Simpan ke riwayat jika tidak ada error
+            if (!display.value.includes("Error")) {
+                const historyRef = database.ref('history').push();
+                historyRef.set({
+                    expression: originalValue,
+                    result: display.value,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+        };
+        
+        // Load riwayat
+        database.ref('history').orderByChild('timestamp').on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            const historyList = document.getElementById('historyList');
+            
+            historyList.insertAdjacentHTML('afterbegin', `
+                <div class="history-item">
+                    ${data.expression} = <strong>${data.result}</strong>
+                    <span>${new Date(data.timestamp).toLocaleString()}</span>
+                </div>
+            `);
+        });
+        </script>
+        <script>
+            document.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  alert("Dibuat Oleh:  MOHAMMAD ILHAM SETIAWAN");
+});
+        </script>
+        <script>
+            document.addEventListener('keydown', (e) => {
+  if (
+    e.ctrlKey || 
+    e.keyCode === 123 // F12
+  ) {
+    e.preventDefault();
+    alert("UwU");
+  }
+});
+        </script>
 </body>
 </html>
